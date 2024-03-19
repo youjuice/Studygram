@@ -9,6 +9,10 @@ from init_db import add_workbook_db, add_study_db
 import requests
 import json
 import sys
+from flask import Flask, render_template, jsonify, request
+import requests
+from bs4 import BeautifulSoup
+from pymongo import MongoClient
 
 app = Flask(__name__)
 jwt = JWTManager(app)
@@ -30,6 +34,10 @@ class CustomJSONProvider(JSONProvider):
 app.json = CustomJSONProvider(app)
 
 # API #1: 메인 페이지
+
+client = MongoClient('localhost', 27017)  # mongoDB는 27017 포트로 돌아갑니다.
+db = client.dbstudy 
+
 @app.route('/')
 def home():
     return render_template('index.html')
@@ -75,6 +83,29 @@ def add_workbook(study_number):
     
     add_workbook_db(username, study_number, workbook_number, language_id)
     return 'Workbook added successfully!'
+def home():
+    return render_template('home.html')
+
+@app.route('/create')
+def create():
+    return render_template('index.html')
+
+@app.route("/makePlanner", methods = ['POST'])
+def make():
+    studyTitle = request.form['studyTitle']
+    language = request.form['language']
+    memo = request.form['memo']
+    
+    data = {'studyTitle': studyTitle, "language": language, "memo": memo}
+
+    db.studygram.insert_one(data)
+
+    return jsonify({"result": 'success'})
+
+@app.route("/readPlanner", methods = ["GET"])
+def read():
+    data = list(db.studygram.find({}, {"_id" : 0}))
+    return jsonify({'result': 'success', 'data': data})
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run('0.0.0.0', port=5000, debug=True)
