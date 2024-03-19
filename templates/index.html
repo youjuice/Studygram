@@ -51,38 +51,35 @@
     <!-- 이 HTML 에서 사용할 JavaScript 를 작성합니다. -->
     <script>
       // 로그인 폼 제출 시
-      $("#loginForm").submit(function (event) {
-        event.preventDefault(); // 기본 제출 동작 방지
+      function submitLoginForm() {
+        $("#loginForm").submit(function (event) {
+          event.preventDefault(); // 기본 제출 동작 방지
+          var form = $(this);
+          var url = "/login";
+          var formData = form.serialize(); // 폼 데이터 직렬화
 
-        console.log("hello");
-        var form = $(this);
-        var url = "/login";
-        var formData = form.serialize(); // 폼 데이터 직렬화
-
-        $.ajax({
-          type: "POST",
-          url: url,
-          data: formData,
-          username: "qwe",
-          password: "ewq",
-          success: function (response) {
-            // 서버로부터의 성공 응답 처리
-            window.location.href = response.redirect_url; // 로그인 성공 시 리다이렉트
-          },
-          error: function (xhr, status, error) {
-            // 서버로부터의 실패 응답 처리
-            var errorMessage = xhr.responseJSON.message;
-            alert(errorMessage); // 오류 메시지 표시
-          },
+          $.ajax({
+            type: "POST",
+            url: url,
+            data: formData,
+            success: function (response) {
+              // 서버로부터의 성공 응답 처리
+              // window.location.href = response.redirect_url; // 로그인 성공 시 리다이렉트
+            },
+            error: function (xhr, status, error) {
+              // 서버로부터의 실패 응답 처리
+              var errorMessage = xhr.responseJSON.message;
+              alert(errorMessage); // 오류 메시지 표시
+            },
+          });
         });
-      });
+      }
 
       // 회원가입 폼 제출 시
       $("#registerForm").submit(function (event) {
         event.preventDefault(); // 기본 제출 동작 방지
         var form = $(this);
-        var url = form.attr("action");
-        let payload = { username: "qwe", password: "ewq" };
+        var url = "/register";
         var formData = form.serialize(); // 폼 데이터 직렬화
 
         $.ajax({
@@ -146,10 +143,13 @@
                     class="form-control"
                     id="password"
                     name="password"
+                    autocomplete="off"
                   />
                 </div>
                 <br />
                 <button
+                  onclick="submitLoginForm()"
+                  form="loginForm"
                   type="submit"
                   class="btn btn-primary btn-block"
                   name="login"
@@ -157,19 +157,17 @@
                   로그인
                 </button>
                 <br />
-
-                <!-- Trigger/Register Modal -->
-                <button
-                  type="button"
-                  class="btn btn-info"
-                  data-toggle="modal"
-                  data-target="#registerModal"
-                >
-                  회원 가입
-                </button>
               </form>
             </div>
-
+            <!-- Trigger/Register Modal -->
+            <button
+              type="button"
+              class="btn btn-info"
+              data-toggle="modal"
+              data-target="#registerModal"
+            >
+              회원 가입
+            </button>
             <!-- Register Modal -->
             <div
               class="modal fade"
@@ -215,6 +213,7 @@
                           id="registerPassword"
                           placeholder="패스워드를 입력해주세요."
                           name="pass"
+                          autocomplete="off"
                         />
                       </div>
                       <div class="form-group">
