@@ -46,7 +46,7 @@ def add_workbook_db(username, study_number, workbook_number, language_id):
         url = f"https://www.acmicpc.net/workbook/view/{workbook_number}"
         response = requests.get(url, headers=headers)
         response.raise_for_status()
-        
+        print(username)
         soup = BeautifulSoup(response.text, 'html.parser')
         
         title_element = soup.select_one('body > div.wrapper > div.container.content > div.row > div:nth-child(2) > div > h1 > span:nth-child(1)')

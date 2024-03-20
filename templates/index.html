@@ -49,10 +49,12 @@
                 let studyTitle = $("#studyTitle").val();
                 let studyPeriod = $("#studyPeriod").val();
                 let memo = $("#memo").val();
+                let give_token = localStorage.getItem("AccessToken");
 
                 $.ajax({
                     type: "POST",
                     url: "/study/add",
+                    headers: { "Authorization": "Bearer " + give_token },
                     data: {study_title: studyTitle, description: memo, date: studyPeriod},
                     success: function(response){
                         if (response["result"] == "success"){
@@ -90,10 +92,27 @@
                     <div class="card-body">
                       <h5 class="card-title">${studyTitle}</h5>
                       <p class="study-card-text">${memo}</p>
-                      <a href="/study/${studyNum}" class="btn btn-info btn-lg btn-block">Let's Go!</a>
+                      <button class="btn btn-info btn-lg btn-block" onclick="sendToken(${studyNum})">Let's Go!</button>
                     </div>
                   </div>`;
                 $("#cards-box").append(tempHtml);
+            }
+
+            function sendToken(studyNum){
+                let studynum = studyNum
+                let token = localStorage.getItem("AccessToken");
+                $.ajax({
+                    type : "GET",
+                    url : `/study/${studynum}`,
+                    headers: { "Authorization": "Bearer " + token },
+                    success: function(response) {
+                    window.location.href = `/study/${studyNum}`;
+                },
+                error: function(xhr, status, error) {
+                    console.error("Error:", xhr.statusText);
+                }
+
+                })
             }
          </script>
          <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
