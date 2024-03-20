@@ -2,7 +2,7 @@ from flask import Flask, render_template, jsonify, request, session, make_respon
 from flask.json.provider import JSONProvider
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
 
-from bson import ObjectId, json_util
+from bson import ObjectId
 from pymongo import MongoClient
 from bs4 import BeautifulSoup
 from init_db import add_workbook_db, add_study_db
