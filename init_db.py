@@ -46,7 +46,7 @@ def add_workbook_db(username, study_number, workbook_number, language_id):
         url = f"https://www.acmicpc.net/workbook/view/{workbook_number}"
         response = requests.get(url, headers=headers)
         response.raise_for_status()
-        
+        print(username)
         soup = BeautifulSoup(response.text, 'html.parser')
         
         title_element = soup.select_one('body > div.wrapper > div.container.content > div.row > div:nth-child(2) > div > h1 > span:nth-child(1)')
@@ -126,5 +126,4 @@ def get_next_page_url(response):
 
 # 함수 호출 예시
 # add_study_db('기초 스터디', '초보 탈출 기원', '2024.08.19 - 2024.09.19') 
-#add_workbook_db('yooju00', 3, 9528, 1001)
-#add_workbook_db('yooju00', 3, 9528, 1004)
+# add_workbook_db('yooju00', 3, 9528, 1003)

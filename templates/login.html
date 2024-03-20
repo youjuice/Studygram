@@ -70,7 +70,7 @@
             if (response["result"] == "success") {
               alert("Login Verified!");
               window.location.reload();
-              window.location.href = "/test";
+              window.location.href = `/index?bjid=${response["baekjoonId"]}&id=${f_username}`;
               localStorage.setItem("AccessToken", response["access_token"]);
             } else {
               alert("서버 문제 : 관리자에게 연락하세요.");
@@ -128,7 +128,7 @@
           error: function (response) {
             // 서버로부터의 실패 응답 처리
             alert(response.responseJSON.error);
-            $("#registerUsername");
+            // $("#registerUsername");
             // window.location.reload();
           },
         });
