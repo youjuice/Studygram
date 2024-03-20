@@ -15,6 +15,7 @@ jwt = JWTManager(app)
 
 client = MongoClient('localhost', 27017)
 db = client.studygram
+collection = db['study']
 
 class CustomJSONEncoder(json.JSONEncoder):
     def default(self, o):
@@ -48,10 +49,10 @@ def study_main(study_number):
 def add_study():
     study_title = request.form['study_title']
     description = request.form['description']
-    date = request.form['date']
+    study_date = request.form['date']
     
-    add_study_db(study_title, description, date)
-    return 'Study added successfully! Study ID: {study_id}'
+    add_study_db(study_title, description, study_date)
+    return jsonify({"result": 'success'})
 
 # 언어에 따른 언어 ID 매핑
 LANGUAGE_IDS = {
@@ -76,5 +77,11 @@ def add_workbook(study_number):
     add_workbook_db(username, study_number, workbook_number, language_id)
     return 'Workbook added successfully!'
 
+# API #6: 스터디 모음 페이지
+@app.route("/study/main", methods = ["GET"])
+def read():
+    data = list(collection.find({}, {"_id" : 0}))
+    return jsonify({'result': 'success', 'data': data})
+
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run('0.0.0.0', port=5001, debug=True)
