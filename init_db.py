@@ -1,7 +1,7 @@
-import random
 import requests
 import threading
 import time
+import uuid
 
 from flask import Flask
 app = Flask(__name__)
@@ -41,6 +41,9 @@ def add_study_db(title, description, study_date):
 # 2. 스터디 북에 문제집 추가
 def add_workbook_db(username, study_number, workbook_number, language_id):
     try:
+        # 워크북 ID 생성
+        workbook_id = str(uuid.uuid4())
+        
         # 백준 문제집 정보 크롤링 (제목, 문제 수)
         headers = {'User-Agent' : 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.86 Safari/537.36'}
         url = f"https://www.acmicpc.net/workbook/view/{workbook_number}"
@@ -101,9 +104,12 @@ def add_workbook_db(username, study_number, workbook_number, language_id):
 
         # MongoDB에 데이터 저장
         workbook = {
+            'workbook_id': workbook_id,
             'workbook_number': workbook_number,
             'workbook_title': problem_title,
             'success_ratio': success_ratio,
+            'total_problems': total_problems,
+            'success_problems': total_success_count,
             'language': language_id
         }
         
@@ -125,6 +131,6 @@ def get_next_page_url(response):
     return None
 
 # 함수 호출 예시
-# add_study_db('기초 스터디', '초보 탈출 기원', '2024.08.19 - 2024.09.19') 
+#add_study_db('기초 스터디', '초보 탈출 기원', '2024.08.19 - 2024.09.19') 
 #add_workbook_db('yooju00', 3, 9528, 1001)
-#add_workbook_db('yooju00', 3, 9528, 1004)
+#add_workbook_db('yooju00', 3, 9528, 1003)
