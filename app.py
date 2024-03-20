@@ -115,6 +115,7 @@ def show_workbooks(study_number):
                                    study_number=study_number, 
                                    study_title=study.get('study_title', ''), 
                                    description=study.get('description', ''),
+                                   date=study.get('study_date', ''),
                                    workbooks_data=workbooks_data)
         else:
             return jsonify({'result': 'failure', 'message': 'Study not found'}), 404
