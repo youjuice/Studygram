@@ -1,0 +1,102 @@
+.login-info-text {
+  color: red;
+  font-family: "Courier New", Courier, monospace;
+}
+
+.modal-form-info-text {
+  font-family: "Courier New", Courier, monospace;
+}
+.modal-content {
+  font-family: "Dancing Script", cursive;
+  font-optical-sizing: auto;
+  font-style: normal;
+}
+.card-body {
+  font-family: "Dancing Script", cursive;
+  font-optical-sizing: auto;
+  font-style: normal;
+}
+.transparent-input {
+  background-color: transparent;
+}
+
+.main-container {
+  height: 1080px;
+  /* background-image: url(../static/books-2596809_1920.jpg); */
+  background-size: cover;
+  background-color: transparent;
+}
+#login-title-text {
+  text-align: center;
+  font-family: "Dancing Script", cursive;
+  font-optical-sizing: auto;
+  font-style: normal;
+  color: black;
+  font-size: large;
+  font-style: bold;
+}
+.modal-form-info {
+  color: red;
+  text-align: center;
+}
+.title-section {
+  background-color: black;
+}
+.title {
+  font-size: xx-large;
+  text-align: center;
+  color: white;
+}
+/* 화면 너비가 600px 이상일 때 */
+@media (min-width: 600px) {
+  .title {
+    font-size: 36px;
+  }
+  .subtitle {
+    font-size: 7px;
+  }
+}
+
+/* 화면 너비가 768px 이상일 때 */
+@media (min-width: 768px) {
+  .title {
+    font-size: 40px;
+  }
+  .subtitle {
+    font-size: 8px;
+  }
+}
+
+/* 화면 너비가 992px 이상일 때 */
+@media (min-width: 992px) {
+  .title {
+    font-size: 44px;
+  }
+  .subtitle {
+    font-size: 9px;
+  }
+}
+
+/* 화면 너비가 1200px 이상일 때 */
+@media (min-width: 1200px) {
+  .title {
+    font-size: 48px;
+  }
+  .subtitle {
+    font-size: 10px;
+  }
+}
+
+.subtitle {
+  margin-top: 30px;
+  padding-top: 15px;
+  text-align: center;
+  color: white;
+  font-size: small;
+}
+.modal {
+  z-index: 1050;
+}
+.modal-open {
+  overflow: hidden;
+}
