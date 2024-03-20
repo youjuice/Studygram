@@ -1,4 +1,4 @@
-from flask import Flask, render_template, jsonify, request, session
+from flask import Flask, render_template, jsonify, request, session, make_response
 from flask.json.provider import JSONProvider
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
 
@@ -38,12 +38,6 @@ def home():
 # API #2: 로그인 기능 구현
 
 
-# API #3: 스터디 메인 페이지
-@app.route('/study/<int:study_number>', methods=['GET'])
-def study_main(study_number):
-    # 스터디 번호를 이용하여 스터디 정보를 렌더링
-    return render_template('study_main.html', study_number=study_number)
-
 # API #4: 스터디 추가
 @app.route('/study/add', methods=['POST'])
 def add_study():
@@ -54,6 +48,7 @@ def add_study():
     add_study_db(study_title, description, study_date)
     return jsonify({"result": 'success'})
 
+
 # 언어에 따른 언어 ID 매핑
 LANGUAGE_IDS = {
     'C++': 1001,
@@ -62,6 +57,13 @@ LANGUAGE_IDS = {
     'C': 1004,
     'Rust': 1005
 }
+
+# API #6: 스터디 모음 페이지
+@app.route("/study/main", methods = ["GET"])
+def read():
+    data = list(collection.find({}, {"_id" : 0}))
+    return jsonify({'result': 'success', 'data': data})
+
 
 # API #5: 스터디에 문제집 추가
 @app.route('/workbook/add/<int:study_number>', methods=['POST'])
@@ -77,11 +79,25 @@ def add_workbook(study_number):
     add_workbook_db(username, study_number, workbook_number, language_id)
     return 'Workbook added successfully!'
 
-# API #6: 스터디 모음 페이지
-@app.route("/study/main", methods = ["GET"])
-def read():
-    data = list(collection.find({}, {"_id" : 0}))
-    return jsonify({'result': 'success', 'data': data})
+
+# API #7: 스터디 상세 페이지
+@app.route("/workbook/main/<int:study_number>", methods=["GET"])
+def show_workbooks(study_number):
+    try:
+        # 특정 스터디의 정보 및 해당 스터디의 워크북 정보를 데이터베이스에서 가져옴
+        study = collection.find_one({'study_number': study_number})
+        workbooks_data = study['workbooks']
+        print(workbooks_data)
+        # 스터디 정보와 워크북 정보를 HTML 템플릿에 전달하여 렌더링
+        return render_template('study_main.html', 
+                               study_number=study_number, 
+                               study_title=study['study_title'], 
+                               description=study['description'],
+                               workbooks_data=workbooks_data)
+    except Exception as e:
+        return str(e), 500
+
 
 if __name__ == '__main__':
     app.run('0.0.0.0', port=5001, debug=True)
+    
