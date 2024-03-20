@@ -1,5 +1,5 @@
 from bson import ObjectId
-from flask import Flask, render_template, request, jsonify,redirect
+from flask import Flask, render_template, request, jsonify,redirect,session
 from flask_cors import CORS
 from flask_jwt_extended import create_access_token, JWTManager, jwt_required, get_jwt_identity
 from flask.json.provider import JSONProvider
@@ -9,6 +9,7 @@ from pymongo import MongoClient
 import bcrypt
 import requests
 from datetime import timedelta
+
 
 app = Flask(__name__)
 CORS(app)
@@ -39,9 +40,9 @@ app.json = CustomJSONProvider(app)
 def hello_world():
     return render_template('login.html')
 
-@app.route('/test')
+@app.route('/index')
 def test():
-    return render_template('test.html')
+    return render_template('index.html')
 
 @app.route("/tt", methods=["GET"])
 @jwt_required()
@@ -97,7 +98,6 @@ def register():
     if existing_baekjoonId:
         return jsonify({"error": "이미 존재하는 사용자입니다"}), 407    
     
-
     hashed_password = bcrypt.hashpw(r_password.encode('utf-8'), bcrypt.gensalt())
     data = {'username': r_username, "password": hashed_password, "backjoonId": r_baekjoonId}
 
