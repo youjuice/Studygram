@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <!-- 다양한 언어를 사용할 수 있도록 UTF-8 을 사용하도록 합니다. -->
+    <meta charset="UTF-8" />
+    <!-- 반응형으로 동작하게 합니다. -->
+    <meta title="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Bootstrap 을 포함합니다. -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://getbootstrap.com/docs/5.3/assets/css/docs.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <!-- jQuery 를 포함합니다. -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <!-- CSS library 인 Bulma 를 포함합니다. -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bulma@0.8.0/css/bulma.min.css"
+    />
+    <!-- 텍스트형태로 되어있는 icon 을 쓸 수 있도록 Font awesome 을 포함하빈다. -->
+    <script
+      defer
+      src="https://use.fontawesome.com/releases/v6.4.0/js/all.js"
+    ></script>
+    <style>
+      /* @font-face {
+        font-family: "IM_Hyemin-Bold";
+        src: url("https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2106@1.1/IM_Hyemin-Bold.woff2")
+          format("woff");
+        font-weight: normal;
+        font-style: normal;
+      } */
+      .transparent-input {
+        background-color: transparent;
+      }
+      .main-container {
+        height: 1080px;
+        /* background-image: url(../static/books-2596809_1920.jpg); */
+        background-size: cover;
+        background-color: transparent;
+      }
+      #login-title-text {
+        text-align: center;
+        /* color: rgb(6, 209, 130); */
+        color: black;
+        font-size: large;
+        font-style: bold;
+      }
+      .modal-form-info {
+        color: red;
+        text-align: center;
+      }
+      .title-section {
+        background-color: black;
+      }
+      .title {
+        font-size: xx-large;
+        text-align: center;
+        color: white;
+      }
+      /* 화면 너비가 600px 이상일 때 */
+      @media (min-width: 600px) {
+        .title {
+          font-size: 36px;
+        }
+        .subtitle {
+          font-size: 7px;
+        }
+      }
+      /* 화면 너비가 768px 이상일 때 */
+      @media (min-width: 768px) {
+        .title {
+          font-size: 40px;
+        }
+        .subtitle {
+          font-size: 8px;
+        }
+      }
+      /* 화면 너비가 992px 이상일 때 */
+      @media (min-width: 992px) {
+        .title {
+          font-size: 44px;
+        }
+        .subtitle {
+          font-size: 9px;
+        }
+      }
+      /* 화면 너비가 1200px 이상일 때 */
+      @media (min-width: 1200px) {
+        .title {
+          font-size: 48px;
+        }
+        .subtitle {
+          font-size: 10px;
+        }
+      }
+      .subtitle {
+        margin-top: 30px;
+        padding-top: 15px;
+        text-align: center;
+        color: white;
+        font-size: small;
+      }
+      .modal {
+        z-index: 1050;
+      }
+      .modal-open {
+        overflow: hidden;
+      }
+    </style>
+    <title>Login - Study Gram</title>
+    <script>
+      // 로그인 폼 제출 시
+      function submitLoginForm() {
+        let form = $(this);
+        let url = "/login";
+        let f_username = $("#username").val();
+        let f_password = $("#password").val();
+        if (f_username === "") {
+          alert("아이디를 입력하세요.");
+          return;
+        }
+        if (f_password === "") {
+          alert("비밀번호를 입력하세요.");
+          return;
+        }
+        $.ajax({
+          type: "POST",
+          url: url,
+          data: { usernames: `${f_username}`, passwords: `${f_password}` },
+          success: function (response) {
+            // 서버로부터의 성공 응답 처리
+            if (response["result"] == "success") {
+              alert("로그인 성공!");
+              window.location.reload();
+              window.location.href = "/test";
+              localStorage.setItem("AccessToken", response["access_token"]);
+            } else {
+              alert("서버 문제 : 관리자에게 연락하세요.");
+              window.location.reload();
+            }
+          },
+          error: function (response) {
+            // 서버로부터의 실패 응답 처리
+            alert(response.responseJSON.msg); // 오류 메시지 표시
+            window.location.reload();
+          },
+        });
+      }
+      // 회원가입 폼 제출 시
+      function submitRegisterForm() {
+        let form = $(this);
+        let url = "/register";
+        let register_username = $("#registerUsername").val();
+        let register_password = $("#registerPassword").val();
+        let register_baekjoonId = $("#registerBaekjoonId").val();
+        if (register_username === "") {
+          $(".modal-form-info-text").text("정글러 아이디를 입력해주세요."); // 내용 변경
+          return;
+        }
+        if (register_password === "") {
+          $(".modal-form-info-text").text("패스워드를 입력해주세요."); // 내용 변경
+          return;
+        }
+        if (register_baekjoonId === "") {
+          $(".modal-form-info-text").text("백준 아이디를 입력해주세요."); // 내용 변경
+          return;
+        }
+        $.ajax({
+          type: "POST",
+          url: "/register",
+          data: {
+            give_username: `${register_username}`,
+            give_password: `${register_password}`,
+            give_baekjoonId: `${register_baekjoonId}`,
+          },
+          success: function (response) {
+            // 서버로부터의 성공 응답 처리
+            if (response["result"] == "success") {
+              alert("회원 가입에 성공하였습니다.");
+              window.location.reload();
+            } else {
+              // 혹은 다른 메시지
+              alert("회원 가입에 실패하였습니다.");
+              window.location.reload();
+            }
+          },
+          error: function (response) {
+            // 서버로부터의 실패 응답 처리
+            alert(response.responseJSON.error);
+            $("#registerUsername");
+            // window.location.reload();
+          },
+        });
+        registerSubmitFlag = true;
+        return true;
+      }
+    </script>
+  </head>
+  <body style="background-color: black">
+    <!-- 제목 부분 -->
+    <!-- <section class="hero is-small is-primary"> -->
+    <section class="title-section">
+      <div class="hero-body">
+        <div class="container center">
+          <h1 class="title">𝓼𝓽𝓾𝓭𝔂𝓰𝓻𝓪𝓶</h1>
+          <h2 class="subtitle">나만의 스터디를 추가해보세요.</h2>
+        </div>
+      </div>
+    </section>
+    <!-- 로그인 부분  -->
+    <div class="main-container">
+      <div class="row justify-content-center">
+        <div class="col-md-6">
+          <div class="card mt-5">
+            <div class="card-header">
+              <h2 class="text-center" id="login-title-text">studygram login</h2>
+            </div>
+            <div class="card-body">
+              <div id="loginForm">
+                <div class="form-group">
+                  <label for="username">정글러 아이디</label>
+                  <input
+                    placeholder="정글러 id를 입력하세요."
+                    type="text"
+                    class="form-control transparent-input"
+                    id="username"
+                    name="username"
+                  />
+                </div>
+                <div class="form-group">
+                  <label for="password">패스워드</label>
+                  <input
+                    placeholder="패스워드를 입력하세요."
+                    type="password"
+                    class="form-control"
+                    id="password"
+                    name="password"
+                    autocomplete="off"
+                  />
+                </div>
+                <br />
+                <button
+                  onclick="submitLoginForm()"
+                  type="button"
+                  class="btn btn-info btn-block"
+                  name="login"
+                >
+                  로그인
+                </button>
+                <br />
+              </div>
+              <!-- Trigger/Register Modal -->
+              <button
+                type="button"
+                class="btn btn-info btn-block"
+                data-toggle="modal"
+                data-target="#registerModal"
+              >
+                회원 가입
+              </button>
+            </div>
+            <!-- Register Modal -->
+            <div
+              class="modal fade"
+              id="registerModal"
+              tabindex="-1"
+              role="dialog"
+              aria-labelledby="registerModalLabel"
+              aria-hidden="true"
+            >
+              <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title" id="registerModalLabel">
+                      회원 가입 하기
+                    </h5>
+                    <button
+                      type="button"
+                      class="close"
+                      data-dismiss="modal"
+                      aria-label="Close"
+                    >
+                      <span aria-hidden="true">&times;</span>
+                    </button>
+                  </div>
+                  <div class="modal-body">
+                    <!-- Registration Form -->
+                    <div>
+                      <div class="form-group">
+                        <label for="registerUsername">정글러 아이디</label>
+                        <input
+                          type="text"
+                          class="form-control"
+                          id="registerUsername"
+                          placeholder="사용할 정글러 아이디를 입력해주세요."
+                          name="username"
+                        />
+                      </div>
+                      <div class="form-group">
+                        <label for="registerPassword">패스워드</label>
+                        <input
+                          type="password"
+                          class="form-control"
+                          id="registerPassword"
+                          placeholder="패스워드를 입력해주세요."
+                          name="pass"
+                          autocomplete="off"
+                        />
+                      </div>
+                      <div class="form-group">
+                        <label for="registerBaekjoonId">백준 아이디</label>
+                        <input
+                          type="text"
+                          class="form-control"
+                          id="registerBaekjoonId"
+                          placeholder="백준 아이디를 입력해주세요."
+                          name="baekjoonId"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  <div class="modal-form-info">
+                    <p class="modal-form-info-text">폼을 채워 주세요.</p>
+                  </div>
+                  <div class="modal-footer">
+                    <button
+                      type="button"
+                      class="btn btn-secondary"
+                      data-dismiss="modal"
+                    >
+                      닫기
+                    </button>
+                    <button
+                      type="button"
+                      class="btn btn-primary"
+                      name="register"
+                      onclick="submitRegisterForm()"
+                    >
+                      가입
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <br />
+    <br />
+    <!-- Modal -->
+    <!-- Bootstrap library -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  </body>
+</html>
