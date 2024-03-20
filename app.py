@@ -9,12 +9,17 @@ from init_db import add_workbook_db, add_study_db
 import requests
 import json
 import sys
+from flask import Flask, render_template, jsonify, request
+import requests
+from bs4 import BeautifulSoup
+from pymongo import MongoClient
 
 app = Flask(__name__)
 jwt = JWTManager(app)
 
 client = MongoClient('localhost', 27017)
 db = client.studygram
+collection = db['study']
 collection = db['study']
 
 class CustomJSONEncoder(json.JSONEncoder):
@@ -31,6 +36,10 @@ class CustomJSONProvider(JSONProvider):
 app.json = CustomJSONProvider(app)
 
 # API #1: 메인 페이지
+
+client = MongoClient('localhost', 27017)  # mongoDB는 27017 포트로 돌아갑니다.
+db = client.dbstudy 
+
 @app.route('/')
 def home():
     return render_template('index.html')
@@ -43,6 +52,7 @@ def home():
 def add_study():
     study_title = request.form['study_title']
     description = request.form['description']
+    study_date = request.form['date']
     study_date = request.form['date']
     
     add_study_db(study_title, description, study_date)
@@ -58,13 +68,6 @@ LANGUAGE_IDS = {
     'Rust': 1005
 }
 
-# API #6: 스터디 모음 페이지
-@app.route("/study/main", methods = ["GET"])
-def read():
-    data = list(collection.find({}, {"_id" : 0}))
-    return jsonify({'result': 'success', 'data': data})
-
-
 # API #5: 스터디에 문제집 추가
 @app.route('/workbook/add/<int:study_number>', methods=['POST'])
 def add_workbook(study_number):
@@ -79,6 +82,11 @@ def add_workbook(study_number):
     add_workbook_db(username, study_number, workbook_number, language_id)
     return 'Workbook added successfully!'
 
+# API #6: 스터디 모음 페이지
+@app.route("/study/main", methods = ["GET"])
+def read():
+    data = list(collection.find({}, {"_id" : 0}))
+    return jsonify({'result': 'success', 'data': data})
 
 # API #7: 스터디 상세 페이지
 @app.route("/workbook/main/<int:study_number>", methods=["GET"])

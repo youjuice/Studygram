@@ -1,175 +1,399 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="en">
   <head>
-    <!-- 다양한 언어를 사용할 수 있도록 UTF-8 을 사용하도록 합니다. -->
-    <meta charset="UTF-8" />
+    <!-- Required meta tags -->
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
 
-    <!-- 반응형으로 동작하게 합니다. -->
-    <meta title="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- CSS -->
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css"
+    />
 
-        <!-- CSS -->
-        <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
-    
-        <!-- Bootstrap CSS -->
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css"
-            crossorigin="anonymous">
+    <!-- Bootstrap CSS -->
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/css/bootstrap.min.css"
+      crossorigin="anonymous"
+    />
 
-		    <!-- JS -->
-        <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-        <script type="text/javascript" src="https://cdn.jsdelivr.net/jquery/latest/jquery.min.js"></script>
-        <script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
-        <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+    <!-- 구글 폰트 : Dancing Script -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400..700&display=swap"
+      rel="stylesheet"
+    />
 
-        <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"
-            crossorigin="anonymous"></script>
-         <title>STUDYGRAM</title>
-         <style>
-            .card-text {
-                text-align: center;
-            } 
-            .wrap {
-                width: 900px;
-                margin: auto;
+    <!-- JS -->
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script
+      type="text/javascript"
+      src="https://cdn.jsdelivr.net/jquery/latest/jquery.min.js"
+    ></script>
+    <script
+      type="text/javascript"
+      src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"
+    ></script>
+    <script
+      type="text/javascript"
+      src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"
+    ></script>
+
+    <script
+      src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"
+      crossorigin="anonymous"
+    ></script>
+    <title>STUDYGRAM</title>
+    <style>
+      #logged-jungler {
+        text-align: center;
+      }
+      .modal-info-text {
+        color: red;
+        font-family: "Courier New", Courier, monospace;
+        margin-right: 10px;
+      }
+      .form-group {
+        font-family: "Courier New", Courier, monospace;
+      }
+      .modal-content {
+        font-family: "Dancing Script", cursive;
+        font-optical-sizing: auto;
+        font-style: normal;
+      }
+      .btn-goto {
+        font-family: "Dancing Script", cursive;
+        font-optical-sizing: auto;
+        font-style: normal;
+      }
+      .navbar-brand {
+        font-family: "Dancing Script", cursive;
+        font-optical-sizing: auto;
+        font-style: normal;
+      }
+      .display-4 {
+        font-family: "Dancing Script", cursive;
+        font-optical-sizing: auto;
+        font-style: normal;
+        font-weight: bold;
+      }
+      .card-text {
+        text-align: center;
+      }
+      .wrap {
+        width: 900px;
+        margin: auto;
+      }
+      .card-row {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+      }
+      .card {
+        flex-basis: calc(33.33% - 10px);
+        margin-bottom: 20px;
+      }
+    </style>
+
+    <script>
+      $(document).ready(function () {
+        $("#cards-box").html("");
+        showStudy();
+      });
+
+      // EventListener
+      $(document).ready(function () {
+        $("#logoutTag").on("click", logoutHandler);
+      });
+
+      function logoutHandler() {
+        give_token = localStorage.getItem("AccessToken");
+
+        if (confirm("you want logout?")) {
+        } else {
+          return;
+        }
+
+        $.ajax({
+          url: "/logout",
+          type: "POST",
+          headers: { Authorization: "Bearer " + give_token },
+          success: function (response) {
+            // Remove JWT token from localStorage
+            localStorage.removeItem("AccessToken");
+            alert("Logged out successfuly");
+            window.location.href = "/login"; // Redirect to login page
+          },
+          error: function (xhr, status, error) {
+            alert("Error:", xhr.statusText);
+          },
+        });
+      }
+
+      function addStudy() {
+        let studyTitle = $("#studyTitle").val();
+        let studyPeriod = $("#studyPeriod").val();
+        let memo = $("#memo").val();
+        let give_token = localStorage.getItem("AccessToken");
+
+        if (studyTitle === "") {
+          $(".modal-info-text").text("input title.");
+          return;
+        }
+        if (studyPeriod === "") {
+          $(".modal-info-text").text("input date.");
+          return;
+        }
+
+        $.ajax({
+          type: "POST",
+          url: "/study/add",
+          headers: { Authorization: "Bearer " + give_token },
+          data: {
+            study_title: studyTitle,
+            description: memo,
+            date: studyPeriod,
+          },
+          success: function (response) {
+            if (response["result"] == "success") {
+              alert("생성 완료!");
+              window.location.reload();
+            } else {
+              alert("ERROR!");
             }
-            .card-row {
-                display: flex;
-                flex-wrap: wrap;
-                justify-content: space-between;
+          },
+        });
+      }
+
+      function showStudy() {
+        $.ajax({
+          type: "GET",
+          url: "/study/main",
+          data: {},
+          success: function (response) {
+            let data = response["data"];
+            for (let i = 0; i < data.length; i++) {
+              makeCard(
+                data[i]["study_number"],
+                data[i]["study_title"],
+                data[i]["study_date"],
+                data[i]["description"]
+              );
             }
-            .card {
-                flex-basis: calc(33.33% - 10px); 
-                margin-bottom: 20px; 
-            }
-         </style>
-         <script>
-            $(document).ready(function () {
-                $("#cards-box").html("");
-                showStudy();
-            });
+          },
+        });
+      }
 
-            function addStudy(){
-                let studyTitle = $("#studyTitle").val();
-                let studyPeriod = $("#studyPeriod").val();
-                let memo = $("#memo").val();
-
-                $.ajax({
-                    type: "POST",
-                    url: "/study/add",
-                    data: {study_title: studyTitle, description: memo, date: studyPeriod},
-                    success: function(response){
-                        if (response["result"] == "success"){
-                            alert("생성 완료!");
-                            window.location.reload();
-                        }else{
-                            alert("ERROR!")
-                        }
-                    }
-                })
-
-            }
-
-            function showStudy(){
-                $.ajax({
-                    type: "GET",
-                    url: "/study/main",
-                    data: {},
-                    success: function(response){
-                        let data = response["data"]
-                        console.log(data);
-                        for (let i = 0; i < data.length; i++){
-                            makeCard(data[i]["study_number"], data[i]["study_title"], data[i]["study_date"], data[i]["description"])
-                        }
-                    }
-                })
-            }
-
-            function makeCard(studyNum, studyTitle, studyPeriod, memo) {
-                let tempHtml = 
-                  `<div class="card">
+      function makeCard(studyNum, studyTitle, studyPeriod, memo) {
+        let tempHtml = `<div class="card">
                     <div class="card-header">
                       ${studyPeriod}
                     </div>
                     <div class="card-body">
                       <h5 class="card-title">${studyTitle}</h5>
                       <p class="study-card-text">${memo}</p>
-                      <a href="/workbook/main/${studyNum}" class="btn btn-info btn-lg btn-block">Let's Go!</a>
+                      <button class="btn btn-secondary btn-lg btn-block btn-goto" onclick="sendToken(${studyNum})">go to Study 🕮</button>
                     </div>
                   </div>`;
-                $("#cards-box").append(tempHtml);
-            }
-         </script>
-         <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
-</head>
-<body>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
-    <div class="wrap">
-        <div class="jumbotron">
-            <h1 class="display-4">STUDYGRAM</h1>
-            <hr class="my-4">
-            <p class="lead">
-                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
-                    스터디 생성
-                </button>
-            </p>
-        </div>
-        <div id="cards-box" class="card-row"></div>
-    </div>
-    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-              <div class="modal-header">
-                <h3 class="modal-title">MAKE STUDY</h3>
-                <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
-                  <span aria-hidden="true">&times;</span>
-                </button>
-              </div>
-              <div class="modal-body" style="margin-top: 15px;"> 
-                  <div class="container">
-                      <form>
-                          <div class="form-group">
-                              <label for="studyTitle">스터디 제목</label>
-                              <input type="text" class="form-control" id="studyTitle" placeholder="스터디 제목을 입력하세요">
-                          </div>
+        $("#cards-box").append(tempHtml);
+      }
 
-                          <div class="form-group">
-                              <label for="studyPeriod">스터디 기간</label>
-                              <input type="text" class="form-control" id="studyPeriod" placeholder="공부할 기간을 입력하세요">
-                          </div>
-                          <!-- JavaScript to initialize the Date Range Picker -->
-                          <script>
-                            $(function() {
-                                $('#studyPeriod').daterangepicker({
-                                    opens: 'left', // 달력이 나타나는 방향
-                                    autoUpdateInput: false, // 기본값 false로 설정하여 자동으로 입력 필드를 업데이트하지 않도록 설정
-                                    locale: {
-                                        format: 'YYYY-MM-DD', // 선택한 날짜의 표시 형식
-                                        cancelLabel: 'Clear' // 취소 레이블
-                                    }
-                                });
+      function sendToken(studyNum) {
+        let studynum = studyNum;
+        let token = localStorage.getItem("AccessToken");
+        $.ajax({
+          type: "GET",
+          url: `/study/${studynum}`,
+          headers: { Authorization: "Bearer " + token },
+          success: function (response) {
+            window.location.href = `/study/${studyNum}`;
+          },
+          error: function (xhr, status, error) {
+            console.error("Error:", xhr.statusText);
+          },
+        });
+      }
+    </script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"
+      crossorigin="anonymous"
+    ></script>
+  </head>
+  <body>
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
+      crossorigin="anonymous"
+    ></script>
+    <nav class="navbar navbar-light bg-light">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="">
+          <img
+            src="../static/img/jungle-logo.png"
+            alt=""
+            width="30"
+            height="24"
+            class="d-inline-block align-text-top"
+          />
+          STUDYGRAM
+        </a>
 
-                                // 날짜가 선택되면 입력 필드를 업데이트
-                                $('#studyPeriod').on('apply.daterangepicker', function(ev, picker) {
-                                    $(this).val(picker.startDate.format('YYYY.MM.DD') + ' - ' + picker.endDate.format('YYYY.MM.DD'));
-                                });
-
-                                // 취소 또는 날짜를 지우면 입력 필드를 비움
-                                $('#studyPeriod').on('cancel.daterangepicker', function(ev, picker) {
-                                    $(this).val('');
-                                });
-                            });
-                          </script>
-                          <div class="form-group">
-                              <label for="memo">메모</label>
-                              <input type="text" class="form-control" id="memo" placeholder="메모를 입력하세요">
-                          </div>
-                      </form>
-                  </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" onclick="addStudy()">등록</button>
-                </div>
+        <div>
+          <div class="nav-item dropdown">
+            <div
+              class="nav-link dropdown-toggle logged-id"
+              href="#"
+              id="navbarDropdown"
+              role="button"
+              data-bs-toggle="dropdown"
+              aria-expanded="false"
+            >
+              아이디
             </div>
+
+            <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+              <li>
+                <!-- <p style="color: grey">jungler ID</p> -->
+                <p style="color: grey" id="logged-jungler">아이디</p>
+              </li>
+              <hr />
+              <li>
+                <a href="" class="dropdown-item" id="logoutTag">Logout</a>
+              </li>
+            </ul>
+          </div>
         </div>
+      </div>
+    </nav>
+    <div class="wrap">
+      <div class="jumbotron">
+        <h1 class="display-4">STUDYGRAM</h1>
+        <hr class="my-4" />
+        <p class="lead">
+          <button
+            type="button"
+            class="btn btn-dark"
+            data-bs-toggle="modal"
+            data-bs-target="#exampleModal"
+          >
+            Make STUDY
+          </button>
+        </p>
+      </div>
+      <div id="cards-box" class="card-row"></div>
     </div>
-</body>
+    <div
+      class="modal fade"
+      id="exampleModal"
+      tabindex="-1"
+      aria-labelledby="exampleModalLabel"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h3 class="modal-title">🕮 MAKE STUDY</h3>
+            <button
+              type="button"
+              class="close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            >
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body" style="margin-top: 15px">
+            <div class="container">
+              <form>
+                <div class="form-group">
+                  <label for="studyTitle">Study Title</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="studyTitle"
+                    placeholder="input study title."
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label for="studyPeriod">Study Period</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="studyPeriod"
+                    placeholder="click here to place the date."
+                  />
+                </div>
+                <!-- JavaScript to initialize the Date Range Picker -->
+                <script>
+                  $(function () {
+                    $("#studyPeriod").daterangepicker({
+                      opens: "left", // 달력이 나타나는 방향
+                      autoUpdateInput: false, // 기본값 false로 설정하여 자동으로 입력 필드를 업데이트하지 않도록 설정
+                      locale: {
+                        format: "YYYY-MM-DD", // 선택한 날짜의 표시 형식
+                        cancelLabel: "Clear", // 취소 레이블
+                      },
+                    });
+
+                    // 날짜가 선택되면 입력 필드를 업데이트
+                    $("#studyPeriod").on(
+                      "apply.daterangepicker",
+                      function (ev, picker) {
+                        $(this).val(
+                          picker.startDate.format("YYYY.MM.DD") +
+                            " - " +
+                            picker.endDate.format("YYYY.MM.DD")
+                        );
+                      }
+                    );
+
+                    // 취소 또는 날짜를 지우면 입력 필드를 비움
+                    $("#studyPeriod").on(
+                      "cancel.daterangepicker",
+                      function (ev, picker) {
+                        $(this).val("");
+                      }
+                    );
+                  });
+                </script>
+                <div class="form-group">
+                  <label for="memo">Memo</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="memo"
+                    placeholder="input memo."
+                  />
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <div class="modal-footer">
+            <div class="modal-info">
+              <p class="modal-info-text"></p>
+            </div>
+            <button type="button" class="btn btn-dark" onclick="addStudy()">
+              Create! 🕮
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+  <script>
+    const URLSearchedBJID = new URLSearchParams(location.search).get("bjid");
+    const URLSearchedID = new URLSearchParams(location.search).get("id");
+    let querryedBJId = document.getElementById("navbarDropdown");
+    let querryedId = document.getElementById("logged-jungler");
+    querryedBJId.innerText = URLSearchedBJID;
+    querryedId.innerText = URLSearchedID;
+  </script>
 </html>
