@@ -141,7 +141,7 @@
             if (response["result"] == "success") {
               alert("로그인 성공!");
               window.location.reload();
-              window.location.href = "/test";
+              window.location.href = "/index";
               localStorage.setItem("AccessToken", response["access_token"]);
             } else {
               alert("서버 문제 : 관리자에게 연락하세요.");
