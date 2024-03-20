@@ -20,6 +20,7 @@ jwt = JWTManager(app)
 client = MongoClient('localhost', 27017)
 db = client.studygram
 collection = db['study']
+collection = db['study']
 
 class CustomJSONEncoder(json.JSONEncoder):
     def default(self, o):
@@ -58,7 +59,10 @@ def add_study():
     study_title = request.form['study_title']
     description = request.form['description']
     study_date = request.form['date']
+    study_date = request.form['date']
     
+    add_study_db(study_title, description, study_date)
+    return jsonify({"result": 'success'})
     add_study_db(study_title, description, study_date)
     return jsonify({"result": 'success'})
 
@@ -87,7 +91,11 @@ def add_workbook(study_number):
 
 # API #6: 스터디 모음 페이지
 @app.route("/study/main", methods = ["GET"])
+
+# API #6: 스터디 모음 페이지
+@app.route("/study/main", methods = ["GET"])
 def read():
+    data = list(collection.find({}, {"_id" : 0}))
     data = list(collection.find({}, {"_id" : 0}))
     return jsonify({'result': 'success', 'data': data})
 
