@@ -2,6 +2,7 @@ from flask import Flask, render_template, jsonify, request, session, make_respon
 from flask.json.provider import JSONProvider
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
 
+from bson import ObjectId
 from pymongo import MongoClient
 from bs4 import BeautifulSoup
 from init_db import add_workbook_db, add_study_db
@@ -38,7 +39,7 @@ def home():
 # API #2: 로그인 기능 구현
 
 
-# API #4: 스터디 추가
+# API #3: 스터디 추가
 @app.route('/study/add', methods=['POST'])
 def add_study():
     study_title = request.form['study_title']
@@ -47,6 +48,31 @@ def add_study():
     
     add_study_db(study_title, description, study_date)
     return jsonify({"result": 'success'})
+
+
+# API #4: 스터디 모음 페이지
+@app.route("/study/main", methods = ["GET"])
+def read():
+    data = list(collection.find({}, {"_id" : 0}))
+    return jsonify({'result': 'success', 'data': data})
+
+
+# API #5: 스터디 삭제
+@app.route("/study/delete", methods = ['POST'])
+def delete_study():
+    study_number = request.json.get('study_number')
+    
+    study = collection.find_one({'study_number': study_number})
+    if not study:
+        return jsonify({'result': 'failure', 'message': 'Study not found'}), 404
+    
+    # DB에서 스터디 삭제
+    result = collection.delete_one({'study_number': study_number})
+
+    if result.deleted_count == 1:
+        return jsonify({'result': 'success'})
+    else:
+        return jsonify({'result': 'failure', 'message': 'Failed to delete study'})
 
 
 # 언어에 따른 언어 ID 매핑
@@ -58,36 +84,32 @@ LANGUAGE_IDS = {
     'Rust': 1005
 }
 
-# API #6: 스터디 모음 페이지
-@app.route("/study/main", methods = ["GET"])
-def read():
-    data = list(collection.find({}, {"_id" : 0}))
-    return jsonify({'result': 'success', 'data': data})
-
-
-# API #5: 스터디에 문제집 추가
+# API #6: 스터디에 문제집 추가
 @app.route('/workbook/add/<int:study_number>', methods=['POST'])
 def add_workbook(study_number):
-    workbook_number = request.form['workbook_number']
-    language = request.form['language']
-    username = session.get['username']
+    data = request.json
+    workbook_number = data.get('workbook_number')
+    language = data.get('language')
+    username = "yooju00"
     
     language_id = LANGUAGE_IDS.get(language)
     if language_id is None:
         return 'Invalid Language', 400
     
+    # print("workbook_number:", workbook_number)
+    # print("language:", language)
     add_workbook_db(username, study_number, workbook_number, language_id)
-    return 'Workbook added successfully!'
+    return jsonify({"result": 'success'})
 
 
-# API #7: 스터디 상세 페이지
+# API #7: 문제집 모음 페이지
 @app.route("/workbook/main/<int:study_number>", methods=["GET"])
 def show_workbooks(study_number):
     try:
         # 특정 스터디의 정보 및 해당 스터디의 워크북 정보를 데이터베이스에서 가져옴
         study = collection.find_one({'study_number': study_number})
         workbooks_data = study['workbooks']
-        print(workbooks_data)
+        # print(workbooks_data)
         # 스터디 정보와 워크북 정보를 HTML 템플릿에 전달하여 렌더링
         return render_template('study_main.html', 
                                study_number=study_number, 
@@ -98,6 +120,42 @@ def show_workbooks(study_number):
         return str(e), 500
 
 
+# API #8: 워크북 삭제
+@app.route('/workbook/delete/<int:study_number>', methods=['POST'])
+def delete_workbook(study_number):
+    workbook_id = request.json.get('workbook_id')
+    if not workbook_id:
+        return jsonify({'result': 'failure', 'message': 'No workbook_id provided'}), 400
+    
+    study = collection.find_one({'study_number': study_number})
+    if not study:
+        return jsonify({'result': 'failure', 'message': 'Study not found'}), 404
+    
+    # 워크북 찾기
+    workbook_to_delete = None
+    workbooks = study.get('workbooks', [])
+    for workbook in workbooks:
+        if workbook.get('workbook_id') == workbook_id:
+            workbook_to_delete = workbook
+            break
+    
+    # 워크북을 못찾으면 실패
+    if not workbook_to_delete:
+        return jsonify({'result': 'failure', 'message': 'Workbook not found'}), 404
+    
+    # 워크북 삭제
+    new_workbooks = [wb for wb in workbooks if wb != workbook_to_delete]
+    result = collection.update_one(
+        {'study_number': study_number},
+        {'$set': {'workbooks': new_workbooks}}
+    )
+    
+    if result.modified_count == 1:
+        return jsonify({'result': 'success'})
+    else:
+        return jsonify({'result': 'failure', 'message': 'Failed to delete workbook'})
+
+    
 if __name__ == '__main__':
     app.run('0.0.0.0', port=5001, debug=True)
     
