@@ -124,11 +124,11 @@ def add_study():
     description = request.form['description']
     study_date = request.form['date']
     study_date = request.form['date']
-    # current_user = get_jwt_identity()
-    # user = db.userInfo.find_one({'username': current_user})
-    # backjoonid = user["backjoonId"]
-    # print(backjoonid)
-    add_study_db(study_title, description, study_date)
+    current_user = get_jwt_identity()
+    user = db.userInfo.find_one({'username': current_user})
+    backjoonid = user["backjoonId"]
+    print(backjoonid)
+    add_study_db(study_title, description, study_date, backjoonid)
     return jsonify({"result": 'success'})
     
 
@@ -163,8 +163,14 @@ def add_workbook(study_number):
 
 # API #6: 스터디 모음 페이지
 @app.route("/study/main", methods = ["GET"])
+@jwt_required()
 def read():
-    data = list(collection.find({}, {"_id" : 0}))
+    current_user = get_jwt_identity()
+    user = db.userInfo.find_one({'username': current_user})
+    username = user["backjoonId"]
+    print(username)
+
+    data = list(collection.find({'backjoonid' : username}, {"_id" : 0}))
     return jsonify({'result': 'success', 'data': data})
 
 

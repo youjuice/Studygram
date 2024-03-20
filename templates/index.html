@@ -172,9 +172,12 @@
       }
 
       function showStudy() {
+        let give_token = localStorage.getItem("AccessToken");
+
         $.ajax({
           type: "GET",
           url: "/study/main",
+          headers: { Authorization: "Bearer " + give_token },
           data: {},
           success: function (response) {
             let data = response["data"];

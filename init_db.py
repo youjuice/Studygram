@@ -17,7 +17,7 @@ global username
 username = None
 
 # 1. 데이터베이스에 스터디북 추가
-def add_study_db(title, description, study_date):
+def add_study_db(title, description, study_date, backjoonid):
     try:
         study_count = collection.count_documents({})
         study_number = study_count + 1
@@ -26,7 +26,8 @@ def add_study_db(title, description, study_date):
             'study_number': study_number,
             'study_title': title,
             'study_date': study_date,
-            'description': description
+            'description': description,
+            'backjoonid': backjoonid
         }
         
         result = collection.insert_one(study)
