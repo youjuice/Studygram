@@ -2,7 +2,7 @@ from flask import Flask, render_template, jsonify, request, session, make_respon
 from flask.json.provider import JSONProvider
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
 
-from bson import ObjectId
+from bson import ObjectId, json_util
 from pymongo import MongoClient
 from bs4 import BeautifulSoup
 from init_db import add_workbook_db, add_study_db
@@ -20,6 +20,8 @@ collection = db['study']
 
 class CustomJSONEncoder(json.JSONEncoder):
     def default(self, o):
+        if isinstance(o, ObjectId):
+            return str(o)
         return json.JSONEncoder.default(self, o)
 
 class CustomJSONProvider(JSONProvider):
@@ -53,21 +55,18 @@ def add_study():
 # API #4: 스터디 모음 페이지
 @app.route("/study/main", methods = ["GET"])
 def read():
-    data = list(collection.find({}, {"_id" : 0}))
+    data = list(collection.find({}))
     return jsonify({'result': 'success', 'data': data})
 
 
 # API #5: 스터디 삭제
 @app.route("/study/delete", methods = ['POST'])
 def delete_study():
-    study_number = request.json.get('study_number')
-    
-    study = collection.find_one({'study_number': study_number})
-    if not study:
-        return jsonify({'result': 'failure', 'message': 'Study not found'}), 404
-    
+    study_id = request.json.get('_id')
+    print("Deleting study with ID:", study_id)
+   
     # DB에서 스터디 삭제
-    result = collection.delete_one({'study_number': study_number})
+    result = collection.delete_one({'_id': ObjectId(study_id)})
 
     if result.deleted_count == 1:
         return jsonify({'result': 'success'})
@@ -106,16 +105,19 @@ def add_workbook(study_number):
 @app.route("/workbook/main/<int:study_number>", methods=["GET"])
 def show_workbooks(study_number):
     try:
-        # 특정 스터디의 정보 및 해당 스터디의 워크북 정보를 데이터베이스에서 가져옴
+        # 특정 스터디의 정보를 데이터베이스에서 가져옴
         study = collection.find_one({'study_number': study_number})
-        workbooks_data = study['workbooks']
-        # print(workbooks_data)
+        
         # 스터디 정보와 워크북 정보를 HTML 템플릿에 전달하여 렌더링
-        return render_template('study_main.html', 
-                               study_number=study_number, 
-                               study_title=study['study_title'], 
-                               description=study['description'],
-                               workbooks_data=workbooks_data)
+        if study:
+            workbooks_data = study.get('workbooks', [])
+            return render_template('study_main.html', 
+                                   study_number=study_number, 
+                                   study_title=study.get('study_title', ''), 
+                                   description=study.get('description', ''),
+                                   workbooks_data=workbooks_data)
+        else:
+            return jsonify({'result': 'failure', 'message': 'Study not found'}), 404
     except Exception as e:
         return str(e), 500
 

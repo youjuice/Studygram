@@ -75,19 +75,20 @@
                     data: {},
                     success: function(response){
                         let data = response["data"]
-                        console.log(data);
                         for (let i = 0; i < data.length; i++){
-                            makeCard(data[i]["study_number"], data[i]["study_title"], data[i]["study_date"], data[i]["description"])
+                            makeCard(data[i]["_id"], data[i]["study_number"], data[i]["study_title"], data[i]["study_date"], data[i]["description"])
                         }
                     }
                 })
             }
 
-            function deleteStudy(studyNumber) {
+            function deleteStudy(studyId) {
+              console.log(studyId);
+
               $.ajax({
                   type: "POST",
                   url: "/study/delete",
-                  data: JSON.stringify({ 'study_number': studyNumber }),
+                  data: JSON.stringify({ '_id': studyId }),
                   contentType: "application/json",
                   success: function(response) {
                       if (response['result'] === 'success') {
@@ -104,7 +105,7 @@
               });
             }
 
-            function makeCard(studyNum, studyTitle, studyPeriod, memo) {
+            function makeCard(studyId, studyNum, studyTitle, studyPeriod, memo) {
                 let tempHtml = 
                   `<div class="card">
                     <div class="card-header">
@@ -113,8 +114,8 @@
                     <div class="card-body">
                       <h5 class="card-title">${studyTitle}</h5>
                       <p class="study-card-text">${memo}</p>
-                      <a href="/workbook/main/${studyNum}" class="btn btn-info btn-lg btn-block">Let's Go!</a>
-                      <a href="#" onclick="deleteStudy('${studyNum}')" class="btn btn-info btn-lg btn-block">Delete Study</a>
+                      <a href="/workbook/main/${studyNum}" class="btn btn-outline-info float-left">Let's Go!</a>
+                      <a href="#" onclick="deleteStudy('${studyId}')" class="btn btn-outline-danger float-right">Delete</a>
                     </div>
                   </div>`;
                 $("#cards-box").append(tempHtml);

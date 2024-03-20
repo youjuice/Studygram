@@ -19,11 +19,11 @@ username = None
 # 1. 데이터베이스에 스터디북 추가
 def add_study_db(title, description, study_date):
     try:
-        study_count = collection.count_documents({})
-        study_number = study_count + 1
+        last_study = collection.find_one({}, sort=[("study_number", -1)])
+        last_study_number = last_study.get('study_number', 0)
         
         study = {
-            'study_number': study_number,
+            'study_number': last_study_number + 1,
             'study_title': title,
             'study_date': study_date,
             'description': description
