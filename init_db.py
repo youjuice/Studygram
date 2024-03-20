@@ -104,6 +104,7 @@ def add_workbook_db(username, study_number, workbook_number, language_id):
             'workbook_number': workbook_number,
             'workbook_title': problem_title,
             'success_ratio': success_ratio,
+            'language': language_id
         }
         
         collection.update_one(
@@ -125,4 +126,5 @@ def get_next_page_url(response):
 
 # 함수 호출 예시
 # add_study_db('기초 스터디', '초보 탈출 기원', '2024.08.19 - 2024.09.19') 
-# add_workbook_db('yooju00', 3, 9528, 1003)
+#add_workbook_db('yooju00', 3, 9528, 1001)
+#add_workbook_db('yooju00', 3, 9528, 1004)
