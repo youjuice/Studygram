@@ -2,6 +2,7 @@ import random
 import requests
 import threading
 import time
+import uuid
 
 from flask import Flask
 app = Flask(__name__)
@@ -19,29 +20,38 @@ username = None
 # 1. 데이터베이스에 스터디북 추가
 def add_study_db(title, description, study_date, backjoonid):
     try:
-        study_count = collection.count_documents({})
-        study_number = study_count + 1
-        
-        study = {
-            'study_number': study_number,
-            'study_title': title,
-            'study_date': study_date,
-            'description': description,
-            'backjoonid': backjoonid
-        }
-        
+        last_study = collection.find_one({}, sort=[("study_number", -1)])
+        if last_study is None:
+            study = {
+                'study_number': 0,
+                'study_title': title,
+                'study_date': study_date,
+                'description': description,
+                'backjoonid': backjoonid
+            }
+        else:
+            last_study_number = last_study.get('study_number', 0)
+            study = {
+                'study_number': last_study_number + 1,
+                'study_title': title,
+                'study_date': study_date,
+                'description': description,
+                'backjoonid': backjoonid
+            }
         result = collection.insert_one(study)
         study_id = result.inserted_id
         
         print("Study data updated and saved to MongoDB")
         print("New study ID: ", study_id)
-        
     except Exception as e:
         print("Error:", e)
 
 # 2. 스터디 북에 문제집 추가
 def add_workbook_db(username, study_number, workbook_number, language_id):
     try:
+        # 워크북 ID 생성
+        workbook_id = str(uuid.uuid4())
+        
         # 백준 문제집 정보 크롤링 (제목, 문제 수)
         headers = {'User-Agent' : 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)AppleWebKit/537.36 (KHTML, like Gecko) Chrome/73.0.3683.86 Safari/537.36'}
         url = f"https://www.acmicpc.net/workbook/view/{workbook_number}"
@@ -102,9 +112,12 @@ def add_workbook_db(username, study_number, workbook_number, language_id):
 
         # MongoDB에 데이터 저장
         workbook = {
+            'workbook_id': workbook_id,
             'workbook_number': workbook_number,
             'workbook_title': problem_title,
             'success_ratio': success_ratio,
+            'total_problems': total_problems,
+            'success_problems': total_success_count,
             'language': language_id
         }
         

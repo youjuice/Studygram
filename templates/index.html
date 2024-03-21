@@ -181,8 +181,10 @@
           data: {},
           success: function (response) {
             let data = response["data"];
+            console.log(data);
             for (let i = 0; i < data.length; i++) {
               makeCard(
+                data[i]["_id"],
                 data[i]["study_number"],
                 data[i]["study_title"],
                 data[i]["study_date"],
@@ -192,8 +194,9 @@
           },
         });
       }
-
-      function makeCard(studyNum, studyTitle, studyPeriod, memo) {
+      // <button class="btn btn-secondary btn-lg btn-block btn-goto" onclick="sendToken(${studyNum})">go to Study 🕮</button>
+      // <a href="/workbook/main/${studyNum}" class="btn btn-info btn-lg btn-block">Let's Go!</a>
+      function makeCard_O(studyNum, studyTitle, studyPeriod, memo) {
         let tempHtml = `<div class="card">
                     <div class="card-header">
                       ${studyPeriod}
@@ -201,10 +204,71 @@
                     <div class="card-body">
                       <h5 class="card-title">${studyTitle}</h5>
                       <p class="study-card-text">${memo}</p>
-                      <button class="btn btn-secondary btn-lg btn-block btn-goto" onclick="sendToken(${studyNum})">go to Study 🕮</button>
+                      
+                      <a href="/study/${studyNum}" class="btn btn-info btn-lg btn-block">Let's Go!</a>
+                      <a href="#" onclick="deleteStudy('${studyNum}')" class="btn btn-info btn-lg btn-block">Delete Study</a>
+                      
                     </div>
                   </div>`;
         $("#cards-box").append(tempHtml);
+      }
+
+      function makeCard(studyId, studyNum, studyTitle, studyPeriod, memo) {
+        let tempHtml = `<div class="card">
+                    <div class="card-header">
+                      ${studyPeriod}
+                    </div>
+                    <div class="card-body">
+                      <h5 class="card-title">${studyTitle}</h5>
+                      <p class="study-card-text">${memo}</p>
+                      <a href="/workbook/main/${studyNum}" class="btn btn-outline-info float-left">Let's Go!</a>
+                      <a href="#" onclick="deleteStudy('${studyId}')" class="btn btn-outline-danger float-right">Delete</a>
+                    </div>
+                  </div>`;
+        $("#cards-box").append(tempHtml);
+      }
+
+      function deleteStudy(studyId) {
+        console.log(studyId);
+
+        $.ajax({
+          type: "POST",
+          url: "/study/delete",
+          data: JSON.stringify({ _id: `${studyId}` }),
+          contentType: "application/json",
+          success: function (response) {
+            if (response["result"] === "success") {
+              alert("스터디가 성공적으로 삭제되었습니다.");
+              // 삭제가 성공하면 페이지 새로 고침
+              location.reload();
+            } else {
+              alert("스터디 삭제 실패: " + response["message"]);
+            }
+          },
+          error: function (xhr, status, error) {
+            alert("오류 발생: " + error);
+          },
+        });
+      }
+
+      function deleteStudy2(studyNumber) {
+        $.ajax({
+          type: "POST",
+          url: "/study/delete",
+          data: { study_number: studyNumber },
+          success: function (response) {
+            if (response["result"] === "success") {
+              alert("스터디가 성공적으로 삭제되었습니다.");
+              // 삭제가 성공하면 페이지 새로 고침
+              location.reload();
+            } else {
+              alert("스터디 삭제 실패: " + response["message"]);
+            }
+          },
+          error: function (xhr, status, error) {
+            alert("오류 발생: " + error);
+          },
+        });
       }
 
       function sendToken(studyNum) {
@@ -398,5 +462,7 @@
     let querryedId = document.getElementById("logged-jungler");
     querryedBJId.innerText = URLSearchedBJID;
     querryedId.innerText = URLSearchedID;
+    console.log(URLSearchedBJID);
+    console.log(URLSearchedID);
   </script>
 </html>
